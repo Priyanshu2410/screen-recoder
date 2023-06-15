@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Screen Recorder",
+  "version": "1.0",
+  "description": "Record your screen with this Chrome extension",
+  "icons": {
+    "16": "1081932.jpg",
+    "48": "1081932.jpg",
+    "128": "1081932.jpg"
+  },
+  "permissions": [
+    "desktopCapture",
+    "tabs",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "1081932.jpg",
+      "48": "1081932.jpg",
+      "128": "1081932.jpg"
+    },
+    "default_title": "Screen Recorder",
+    "default_popup": "popup.html"
+  }
+}
