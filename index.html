@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Recorder</title>
+    <title>Screen Recorder and Screenshot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
     <style>
         body {
             display: flex;
@@ -55,6 +57,69 @@
             margin-top: 20px;
             font-size: 16px;
         }
+        /* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+* {
+  font-family: 'Poppins', sans-serif;
+}
+body {
+  padding: 0 30px;
+}
+#src-btn, .screenshot {
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#src-btn {
+  bottom: 15px;
+  border: none;
+  outline: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 15px 25px;
+  border-radius: 30px;
+  background: #4a98f7;
+}
+.src-preview {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0,0,0,0.65);
+  transition: all 0.15s ease;
+}
+.src-preview.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.src-preview .screenshot {
+  width: 70%;
+  top: 50%;
+  opacity: 0;
+  pointer-events: none;
+  aspect-ratio: 16 / 9;
+  transition: transform 0.15s ease;
+  transform: translate(-50%, -50%) scale(0.9);
+}
+.src-preview.show .screenshot{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.screenshot #close-btn {
+  position: absolute;
+  right: -25px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+.screenshot img {
+  width: 100%;
+}
     </style>
 </head>
 
@@ -65,11 +130,21 @@
         <div class="button-container">
             <button class="button" id="startButton">Start Recording</button>
             <button class="button" id="stopButton" disabled>Stop Recording</button>
+            <p class="status-message" id="statusMessage"></p>
+
+            <a id="downloadLink" class="download-link" download></a>
+            <button id="src-btn">Capture Screenshot</button>
+            <div class="src-preview">
+                <div class="screenshot">
+                    <i id="close-btn" class="fa-solid fa-xmark"></i>
+                    <img id="screenshotImg" src="" alt="screenshot">
+                    <a id="downloadLink" href="#" download="screenshot.png">Download</a>
+                </div>
+            </div>
+
         </div>
 
-        <p class="status-message" id="statusMessage"></p>
-
-        <a id="downloadLink" class="download-link" download></a>
+       
     </div>
 
     <script>
@@ -135,6 +210,41 @@
 
         document.getElementById("startButton").addEventListener("click", startRecording);
         document.getElementById("stopButton").addEventListener("click", stopRecording);
+        const screenshotBtn = document.querySelector("#src-btn");
+      const screenshotPreview = document.querySelector(".src-preview");
+      const closeBtn = screenshotPreview.querySelector("#close-btn");
+      const screenshotImg = screenshotPreview.querySelector("#screenshotImg");
+      const downloadLink = screenshotPreview.querySelector("#downloadLink");
+
+      const captureScreen = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getDisplayMedia({ preferCurrentTab: true });
+          const video = document.createElement("video");
+
+          video.addEventListener("loadedmetadata", () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            video.play();
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            stream.getVideoTracks()[0].stop();
+
+            const dataURL = canvas.toDataURL();
+            screenshotImg.src = dataURL;
+            downloadLink.href = dataURL;
+            screenshotPreview.classList.add("show");
+          });
+
+          video.srcObject = stream;
+        } catch (error) {
+          alert("Failed to capture screenshot!");
+        }
+      };
+
+      closeBtn.addEventListener("click", () => screenshotPreview.classList.toggle("show"));
+      screenshotBtn.addEventListener("click", captureScreen);
     </script>
 </body>
 
